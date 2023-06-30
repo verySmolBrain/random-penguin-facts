@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.21.1)
 
 # Project Name | Version Number | Language
-project(penguins VERSION 0.0.1 LANGUAGES CXX)
+project(penguins_app VERSION 0.0.1 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
