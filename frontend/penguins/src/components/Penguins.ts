@@ -19,7 +19,9 @@ export const useYourOutput = () => {
             console.log(Module)
 
             const result = module.cat();
-            setOutput(result);
+
+            const result_2 = module.penguin();
+            setOutput(result + ' ' + result_2);
         }
     }, [module]);
     

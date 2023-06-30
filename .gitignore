@@ -39,3 +39,7 @@ wasm_server
 .cache
 
 .qt
+
+test_webworker
+
+test_webworker_not

@@ -10,3 +10,4 @@ EMSCRIPTEN_BINDINGS(penguin_module) {
 }
 
 //         "-DCMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS} -lembind -s EXPORT_ES6=1'"
+// "/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake"
