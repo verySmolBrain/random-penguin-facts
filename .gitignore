@@ -31,7 +31,8 @@
 *.out
 *.app
 
-/build
+build
+*/build
 wasm_server
 
 .vscode
@@ -43,3 +44,5 @@ wasm_server
 test_webworker
 
 test_webworker_not
+
+node_modules

@@ -1,0 +1,29 @@
+{
+    "name": "penguins",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "test_cxx": "", 
+        "test_wasm": "npm --prefix ./backend run build_lib && npm --prefix ./backend run test", 
+        
+        "test_backend": "", 
+        "test_frontend": "", 
+        "test": "npm run test_cxx && npm run test_wasm", 
+
+        "attach_frontend": "npm run build_backend && cp $npm_package_config_backend_build $npm_package_config_frontend_build",
+        
+        "dev_frontend": "npm run attach_frontend && npm --prefix ./frontend run dev", 
+        
+        "build_backend": "npm --prefix ./backend run build_lib", 
+        
+        "build_frontend": "", 
+        "build": "", 
+        
+        "preview": "npm --prefix ./frontend run preview"
+    },
+    "config": {
+        "backend_build": "./backend/build/src/app/penguin_app.js ./backend/build/src/app/penguin_app.wasm",
+        "frontend_build": "./frontend/src/utils"
+    }
+}

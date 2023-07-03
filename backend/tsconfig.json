@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "lib": [
+            "ESNext" 
+        ],
+      
+        "module": "NodeNext",
+        "outDir": "./dist",
+        "rootDir": "./tests",
+
+        "moduleResolution": "NodeNext",
+        "esModuleInterop": true,
+        
+        "strict": false,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true, 
+    },
+
+    "include": [
+        "tests/**/*.ts", "tests/js_tests/utils/wasm.utils.ts",
+    ],
+    "exclude": [
+        "node_modules",
+        "./dist/"
+    ],
+}
