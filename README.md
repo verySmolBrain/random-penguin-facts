@@ -60,7 +60,7 @@ Your .vscode should contain 3 files:
 
 This should be automatically generated for you. It will differ based on your OS etc. For compiler I'm using `Clang 14.0.0 x86_64-pc-linux-gnu` but
 since I'm not doing anything overly complex as long as you're using a QT + Emscripten compatible Compiler for C++ it should be ok (As of the time
-of writing). I'll list the QT + Emscripten versions in the [Environment Setup](#environment-eetup) section.
+of writing). I'll list the QT + Emscripten versions in the [Environment Setup](#environment-setup) section.
 
 ```
 {
