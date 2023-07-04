@@ -115,6 +115,13 @@ of writing). I'll note the QT + Emscripten versions in the [Environment Setup](#
 }
 ```
 
+```
+    "jestrunner.runOptions": ["--coverage", "--colors"],
+    "jestrunner.jestCommand": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+```
+
+### cmake-tools-kits.json
+
 You also have to set `cmake-tools-kits.json` by going to command palette `CMake: Edit User-Local CMake Kits` and appending this to the list:
 
 ```json
@@ -144,12 +151,11 @@ regarding this issue. I think? it has something to do with ClangD ignoring / not
 required. (I didn't explore this path much since I wasn't too invested in the ClangD extension so feel free to explore
 this).
 
-- If you use QT CMake tools and their macros (In particular `qt_standard_project_setup`), it requires you to use `CMake: Delete Cache and Reconfigure` from the VSCode CMake extension each time you build with the CMake extension otherwise it complains that it can't find `qt_standard_project_setup`. I'm not sure what's causing the problem but my suspicion is it has something to do with the flags that `qt_standard_project_setup` sets. I've decided to just not use their macros since I'm not comfortable with it doing so many things under the hood (And so far it runs fine but I've also not gone very indepth with QT at all). This shouldn't affect anything in the project even if you do set it up (Since we use a shellscript to build instead of the extension with npm) but it was a minor annoyance to me.
+- If you use QT CMake tools and their macros (In particular `qt_standard_project_setup`), it requires you to use `CMake: Delete Cache and Reconfigure` from the VSCode CMake extension each time you build with the CMake extension otherwise it complains that it can't find `qt_standard_project_setup`. I'm not sure what's causing the problem but my suspicion is it has something to do with the flags that `qt_standard_project_setup` sets. I've decided to just not use their macros since I'm not comfortable with it doing so many things under the hood (And so far it runs fine but I've also not gone very indepth with QT at all). This shouldn't affect anything in the project even if you do set it up (Since we mainly use a script to build instead of the CMake extension) but it was a minor annoyance to me.
 
-- Jest test runner extension only partially works. This is because to get Jest working with ES6 modules, the official workaround is to call
+- Jest test runner extension works only with a hacky workaround. This is because to get Jest working with ES6 modules, the official workaround is to call Jest with node --experimental-vm-modules. You'll get Warnings about it being an experimental feature because as of the time of writing the ES6 standard has many basic features still being experimental. It's a minor annoyance and I've talked more about this issue in [Frontend](#es6-issues--typescript-issue--frontend-reflection).
 
-- Typescript linter doesn't work because of issues with ts-jest + node. I'm not sure what's causing this exactly and I'm also
-not sure how to fix it.
+- Typescript linter doesn't work if you try to import modules using ES6 imports like `import module from 'path'` even if it compiles fine with Jest. It also compiles and runs fine if you add `.ts` to the end of `path` but the linter doesn't like it. I've talked more about this issue in [Frontend](#es6-issues--typescript-issue--frontend-reflection).
 
 - Intellisense and CMakeTools doesn't work well in nested folders (eg. If you're in project root directory intellisense won't work if you open ./backend/src). Personally I just open new separate workspaces for backend and frontend.
 
@@ -200,8 +206,7 @@ If you want more information I find that `settings.js` in the src folder of Emsc
 nothing to do with the issue. For example got this flag after I accidentally passed in -no-entry and only realised after reinstalling and building
 QT + Emscripten multiple times.
 
-Make sure you set emcc environment
-
+- Make sure your environment is properly setup before building. You'll need to either use `qt-cmake` from the QT CMake tools or pass it the toolchain file it links to. You also have to setup Emscripten environment variables properly. I ran into a few issues initially with getting this working with VSCode. I've talked more about this in [VSCode Setup](#vscode-setup).
 
 
 # QT CMake Reflection
@@ -222,6 +227,8 @@ The official QT CMake documentation recommends using `qt_cmake`. I've looked at 
 the QT CMake toolchain file. Personally I like things to be more explicit so I've decided to just use normal CMake and just pass it
 the toolchain file instead as an argument.
 
+QT CMake also generates extra things. For example it'll generate a .html file and a `qtloader.js` file. I've found that it makes things more confusing instead and I'm not a fan of it generating them since it feels redundant for our project.
+
 # ES6 Issues + Typescript Issue + Frontend Reflection
 
 https://github.com/emscripten-core/emscripten/issues/18626
@@ -230,6 +237,9 @@ https://github.com/emscripten-core/emscripten/issues/18626
 es6 - good and bad
 
 typescript
+
+- Typescript linter doesn't work because of issues with ts-jest + node. I'm not sure what's causing this exactly and I'm also
+not sure how to fix it.
 
 ts-jest
 
@@ -258,19 +268,14 @@ Emscripten by itself works pretty nicely (Most of the time).
 The main issues I ran into were from weird ES6 vs CommonJS compatibility. I've mentioned most of them in [Emscripten Build Flags](#emscripten-flags).
 So far with Emscripten, porting it over to ES6 seems like the only way to get it working with a modern build tool like Vite which all seem to expect ES6 modules instead of CommonJS. I've talked more about this in [Frontend](#es6-issues--typescript-issue--frontend-reflection) but essentially if you want to use CommonJS you either stick it straight into a .html file, you try to use some weird .vite settings to configure CommonJS imports or you try another bundler like WebPack. 
 
-I've also found a hacky method where you edit the .js file output by Emscripten directly and modify it to use ES6 syntax at the very bottom of the file. I found this worked for single-threaded Emscripten but once you include webworker.js it's very hard to get it working.
+I've also found a hacky method where you edit the .js file output by Emscripten directly and modify it to use ES6 syntax at the very bottom of the file. I found this worked for single-threaded Emscripten but once you include webworker.js it's very hard to get it working because of the way the imports are generated by Emscripten. Note also I ran into issues when trying to rename my files to something other than what Emscripten generated. You can adjust this pretty easily if you don't have optimised output. An issue I ran into with QT CMake is that it automatically optimises the output which makes it harder to do things like this with it.
 
-For Emscripten make sure you load the .js file it outputs with async because it needs time to instantiate the .wasm file. The way you do this depends on which flags you use for the project and where you're loading it eg. in a Node environment vs HTML environment vs React environment.
+For Emscripten make sure you load the .js file it outputs with async because it needs time to instantiate the .wasm file. The way you do this depends on which flags you use for the project and where you're loading it eg. in a Node environment vs HTML environment vs React environment. An important distinction is between using or not using the `modularize=1` flag. Without the `modularize=1` flag, Emscripten generates the script in the global scope with default name `Module` unless you've set it to something else with `EXPORT_NAME`. You then simply call `onRunTimeInitialised` (This is essentially a function from the Module wrapper class generated by Emscripten). If you use `modularize=1` then you can initialise multiple instances of the WASM
+object which means you should instead just use `await MyModuleName()` instead. Note that the default generated HTML file does not support this and you'll have to modify it to support this. I've found that once you get a proper Frontend setup like React and have a generated workflow the HTML file becomes largely irrelevant.
 
-cors
+A common issue you'll find documented is CORS issue with SharedArrayBuffer if you decide to use pthreads and web workers (Personally I've struggled to get web workers running with QT + Emscripten). A solution if you want to play with standard HTML files was the `qtwasmserver.py` that you can download from Python pip. Emscripten also has a built in tool for this. I've talked about how to integrate this easily with Vite + React in [Frontend](#es6-issues--typescript-issue--frontend-reflection).
 
-embind make sure it is linked together in the build
-
-
-html and html entry point
-
-
-embind tips
+This is more of a personal note but make sure you link your libraries properly if you're using Embind. I've found that the Embind doesn't actually generate if you don't do this.
 
 # WIP
 
@@ -282,6 +287,8 @@ embind tips
 - proper typescript
 - Organise thoughts
 
+- Remember more specific issues I ran into
+
 ## VSCode
 
 - Fix CMake Tools Bug
@@ -289,13 +296,3 @@ embind tips
 # Compatibility
 
 Tested on Ubuntu + Mac
-
-
-cmake --no-warn-unused-cli -DCMAKE_TOOLCHAIN_FILE:STRING=/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry" -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/clang -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++ -S . -B build
-
-
-
-
-
-c_cpp_properties
-build.sh
