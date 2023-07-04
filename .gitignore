@@ -46,3 +46,5 @@ test_webworker
 test_webworker_not
 
 node_modules
+
+backend/coverage
