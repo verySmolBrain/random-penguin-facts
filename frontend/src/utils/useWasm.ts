@@ -21,3 +21,6 @@ const useWASM = <T>(
 };
 
 export default useWASM;
+
+// lifecycles
+// visitor pattern calling js code

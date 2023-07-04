@@ -13,6 +13,29 @@ public:
     virtual std::string visit(PenguinHabitat* element) = 0;
 };
 
+struct VisitorWrapper : public emscripten::wrapper<Visitor> {
+    EMSCRIPTEN_WRAPPER(VisitorWrapper);
+    std::string visit(CatHabitat* element) {
+        return call<std::string>("visit", element);
+    }
+    std::string visit(PenguinHabitat* element) {
+        return call<std::string>("visit", element);
+    }
+};
+
+// struct Interface {
+//     virtual ~Interface() {}
+
+//     virtual void invoke(const std::string& str) = 0;
+// };
+
+// struct InterfaceWrapper : public emscripten::wrapper<Interface> {
+//     EMSCRIPTEN_WRAPPER(InterfaceWrapper);
+//     void invoke(const std::string& str) {
+//         return call<void>("invoke", str);
+//     }
+// };
+
 class ConcreteVisitor : public Visitor {
 public:
     std::string visit(CatHabitat* element) override {
