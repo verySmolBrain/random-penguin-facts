@@ -1,5 +1,5 @@
 # Static vs Dynamic vs Shared Library -> Look Into
-qt_add_library(penguin_facts STATIC
+add_library(penguin_facts STATIC
     penguins.cpp 
     penguins.h
 )

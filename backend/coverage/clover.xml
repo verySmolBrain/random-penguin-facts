@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1688459099748" clover="3.2.0">
+  <project timestamp="1688459099748" name="All files">
+    <metrics statements="6" coveredstatements="6" conditionals="3255" coveredconditionals="359" methods="1104" coveredmethods="167" elements="4365" coveredelements="532" complexity="0" loc="6" ncloc="6" packages="2" files="2" classes="2"/>
+    <package name="build.src.app">
+      <metrics statements="5" coveredstatements="5" conditionals="3255" coveredconditionals="359" methods="1103" coveredmethods="166"/>
+      <file name="penguin_app.js" path="/home/smolbrain/sda/projects/random-penguin-facts/backend/build/src/app/penguin_app.js">
+        <metrics statements="5" coveredstatements="5" conditionals="3255" coveredconditionals="359" methods="1103" coveredmethods="166"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="8" count="1741" type="cond" truecount="358" falsecount="2896"/>
+        <line num="11" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="tests.js_tests.utils">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="wasm.utils.js" path="/home/smolbrain/sda/projects/random-penguin-facts/backend/tests/js_tests/utils/wasm.utils.js">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

@@ -1,4 +1,4 @@
-import { useWASM } from '../utils/wasm.utils';
+import { useWASM } from '../utils/wasm.utils.js';
 
 // const WASM_instance = await useWASM();
 

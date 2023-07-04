@@ -4,6 +4,13 @@
 
 Small experimental project to learn QT and WebAssembly.
 
+# Quick Setup
+
+Follow this
+
+and this
+
+and this
 
 
 # Environment Setup
@@ -24,6 +31,10 @@ Small experimental project to learn QT and WebAssembly.
 
 - CMake Tools (Automatically configures intellisense based on CMake file. Not technically required for building but you can use it.)
 - C/C++ Extension Pack (Intellisense + Normal C++ Tools)
+
+Optional
+
+- Jest Test Runner
 
 ## Setup
 
@@ -99,21 +110,23 @@ of writing). I'll note the QT + Emscripten versions in the [Environment Setup](#
 ```
 
 
-## Issues I Ran Into
+## VSCode Issues
 
 - ClangD Extension intellisense doesn't detect Emscripten library. [This](https://stackoverflow.com/questions/76250587/vscode-clangd-failed-to-find-my-header-file-not-found-clangpp-file-not-found) stackoverflow post has some explanation
 regarding this issue. I think? it has something to do with ClangD ignoring / not having some options in the
 `includePaths` settings.json file in .vscode so it relies purely on the CMake file. Problem is I've offset some of
 the flags required to build in .vscode since I've run into a few issues with CMake since it uses QT CMake Macros if I don't
-do it that way.
+do it that way. (I didn't explore this path much since I wasn't too invested in the ClangD extension so feel free to explore
+this).
 
-## Known Bugs
+- If you use QT CMake tools and their macros (In particular `qt_standard_project_setup`), it requires you to use `CMake: Delete Cache and Reconfigure` from the VSCode CMake extension each time you build with the CMake extension otherwise it complains that it can't find `qt_standard_project_setup`. I'm not sure what's causing the problem but my suspicion is it has something to do with the flags that `qt_standard_project_setup` sets. I've decided to just not use their macros since I'm not comfortable with it doing so many things under the hood (And so far it runs fine but I've also not gone very indepth with QT at all). This shouldn't affect anything in the project even if you do set it up (Since we use a shellscript to build instead of the extension with npm) but it was a minor annoyance to me.
 
-- CMake Tools extension for VSCode requires you to use `CMake: Delete Cache and Reconfigure` each time you build. I'm not sure
-what's causing this.
+- Jest test runner extension only partially works. This is because to get Jest working with ES6 modules, the official workaround is to call
+
+
 - Typescript linter doesn't work because of issues with ts-jest + node. I'm not sure what's causing this exactly and I'm also
 not sure how to fix it.
-- Jest runner doesn't work because I'm using an experimental flag so ts-jest is compatible with node.
+
 
 
 
@@ -157,17 +170,29 @@ ES6 imports (Or at least I haven't been able to get it to work)
 
 If you want more information I find that `settings.js` in the src folder of Emscripten has comments that have clarified a few things for me.
 
-# ES6 Issues + Typescript Issue
+
+# QT CMake Reflection
+
+If you read the official guide of QT CMake they'll recommend using their CMake macros such as:
+
+- `qt_standard_project_setup()`
+- `qt_add_library()`
+- `qt_add_executable()`
+
+I found this caused issues as described [here](#issues-i-ran-into). You might also run into a few minor issues such as `VULKAN_HEADER` missing
+when building. [This](https://stackoverflow.com/questions/48014518/why-is-vulkan-library-set-to-vulkan-library-notfound-yet-vulkan-found-is-true)
+post explains why and though it's a minor inconvenience it shouldn't affect the resulting output.
+
+I've already listed this in [build issues](#building-issues)
+
+# ES6 Issues + Typescript Issue + Frontend Reflection
 
 https://github.com/emscripten-core/emscripten/issues/18626
 
 cmake --no-warn-unused-cli -DCMAKE_TOOLCHAIN_FILE:STRING=/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry" -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/clang -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++ -S . -B build
 
 
-
-
-
-## Emscripten
+# Emscripten
 
 
 
@@ -178,7 +203,13 @@ cmake --no-warn-unused-cli -DCMAKE_TOOLCHAIN_FILE:STRING=/opt/qt6-emscripten-thr
 - Include Binaryen (Or alternatives) to view readable WASM file
 - Setup config files for easy building (export paths)
 - github actions (Install + Run npm run test)
+- proper typescript
+- Organise thoughts
 
 ## VSCode
 
 - Fix CMake Tools Bug
+
+# Compatibility
+
+Tested on Ubuntu + Mac
