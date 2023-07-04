@@ -5,52 +5,25 @@
 Small experimental project to learn QT and WebAssembly.
 
 
-- Don't hardcode CMakeLists.txt variables for subdirectories
-
-
-- Finish Setup CI/CD
-
-Setup CI/CD
-- npm run test_cxx (Build + Catch tests)
-- npm run test_wasm (Build + Jest tests)
-- npm run test_backend (Both Catch + Jest)
-- npm run test_frontend (Do nothing for now)
-- npm run test (Do nothing for now)
-- npm run dev_frontend (Should build_backend -> cp generated files to frontend -> run vite with npm run dev)
-- npm run build_backend (CMake Build)
-- npm run build_frontend (Should build_backend -> cp generated files to frontend -> run vite with npm run build)
-- npm run build (Should just be npm run build_frontend)
-- npm run preview (Should just call npm run preview in frontend)
-
-(Installing Emscripten + QT + Everything is Pain)
-- github actions (Install + Run npm run test)
-
-- Object lifetimes
-- Calling Javascript Class in Function
-
-
-Stuff to Think About
-- ESM vs commonjs (ESM better for React Vite but commonjs better for HTML. Also ESM unstable.)
-- CMake vs NPM
-- Getting TypeScript to work with Jest + WASM Module
-- Fix Jest Tests (Jest Runner Not Working For Individual + Linting not recognising jest) -> (Is it even possible? Or worth it?)
-- Fix caching thing with CMakeLists
-- Build warnings with WASM
-- Bug have to have binding in main (Linking issue?)
-
-Directly bypassing the JSON Glue Code and use the thing?
-
-
 
 # Environment Setup
+
+## QT
+
+## Emscripten
+
+## Node
+
+## Vite
+
 
 
 # VSCode Setup
 
 ## Extensions
 
-- CMake Tools (Automatically configures intellisense)
-- C/C++ Extension Pack (Intellisense + Normal Tools)
+- CMake Tools (Automatically configures intellisense based on CMake file. Not technically required for building but you can use it.)
+- C/C++ Extension Pack (Intellisense + Normal C++ Tools)
 
 ## Setup
 
@@ -60,9 +33,9 @@ Your .vscode should contain 3 files:
 
 This should be automatically generated for you. It will differ based on your OS etc. For compiler I'm using `Clang 14.0.0 x86_64-pc-linux-gnu` but
 since I'm not doing anything overly complex as long as you're using a QT + Emscripten compatible Compiler for C++ it should be ok (As of the time
-of writing). I'll list the QT + Emscripten versions in the [Environment Setup](#environment-setup) section.
+of writing). I'll note the QT + Emscripten versions in the [Environment Setup](#environment-setup) section.
 
-```
+```json
 {
     "configurations": [
         {
@@ -85,6 +58,46 @@ of writing). I'll list the QT + Emscripten versions in the [Environment Setup](#
 ### cmake_variants.json
 
 
+```json
+{
+    "buildType": {
+        "default": "debug",
+        "choices": {
+            "debug": {
+                "short": "Debug",
+                "buildType": "Debug",
+                "settings": {
+                    "CMAKE_FIND_DEBUG_MODE": "TRUE"
+                }
+            },
+            "release": {
+                "short": "Release",
+                "buildType": "Release"
+            }
+        }
+    },
+    "targetType": {
+        "default": "executable",
+        "description": "The target type to build",
+        "choices": {
+            "executable": {
+                "short": "Executable",
+                "settings": {
+                    "CMAKE_TOOLCHAIN_FILE": "/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake"
+                }
+            },
+            "library": {
+                "short": "Library",
+                "settings": {
+                    "CMAKE_TOOLCHAIN_FILE": "/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake",
+                    "CMAKE_CXX_FLAGS": "${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry"
+                }
+            }
+        }
+    }
+}
+```
+
 
 ## Issues I Ran Into
 
@@ -106,44 +119,66 @@ not sure how to fix it.
 
 # Building Issues
 
-## CMake + Emscripten + QT + Singlethreaded + ESM
+## Rundown of How Combinations of QT CMake + Emscripten vs Emcc + Threadless vs PThreads + ESM vs CommonJS Performs
+
+### CMake + Emscripten + QT + Singlethreaded + ESM
 
 - [x] Jest
 - [x]
 
 - So far works for everything. Downside is no webworker.
 
-## EMCC + Multithreaded + ESM
+### EMCC + Multithreaded + ESM
 - Works for everything except Vite Build. Vite bug with web workers.
 
-## CMake + Emscripten + QT + Multithreaded + ESM
+### CMake + Emscripten + QT + Multithreaded + ESM
 - Doesn't work on Vite Dev (QT-CMAKE Compiles weirdly. Has to do with the way it's compiled as worker.js uses commonjs imports.)
 
-## EMCC | CMake + CommonJS
+### EMCC | CMake + CommonJS
 - Works for everything except Vite Dev. Can't import CommonJS because Vite works mostly with ESM modules. 
 Tried webpack but I don't know how to set it up to work with wasm.
 
+## Emscripten Flags
 
+Do note there's an issue? with QT CMake where you can pass it flags and it will do either nothing or break everything. Here's
+a rundown of issues I've gotten with flags:
+
+- If you pass in an invalid flag (Sometimes?) then QT CMake will give a really obscure message about R_WRAP not existing that has
+nothing to do with the issue. For example I accidentally passed in -no-entry and only realised after reinstalling and building
+QT + Emscripten multiple times.
+
+- QT CMake automatically injects a few flags into emcc when it compiles. I haven't narrowed down the exact flags but I do know
+it uses an optimisation flag because it spits out unreadable / compiled .js files whereas if you compile with emcc it compiles readable .js files.
+This might be helpful to know since I've tracked down a few issues I had involving ES6 exports / imports by manually compiling and
+reading some of the comments / code. It also does something weird with web worker if you use --feature-threads that is incompatible with 
+ES6 imports (Or at least I haven't been able to get it to work)
+
+
+
+If you want more information I find that `settings.js` in the src folder of Emscripten has comments that have clarified a few things for me.
 
 # ES6 Issues + Typescript Issue
 
-
 https://github.com/emscripten-core/emscripten/issues/18626
-
 
 cmake --no-warn-unused-cli -DCMAKE_TOOLCHAIN_FILE:STRING=/opt/qt6-emscripten-threadless/lib/cmake/Qt6/qt.toolchain.cmake "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry" -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/clang -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++ -S . -B build
 
 
 
-# WIP
 
+
+## Emscripten
+
+
+
+# WIP
 
 ## Misc
 
 - Include Binaryen (Or alternatives) to view readable WASM file
 - Setup config files for easy building (export paths)
-- Finalise CI/CD
+- github actions (Install + Run npm run test)
 
 ## VSCode
 
-- 
+- Fix CMake Tools Bug
