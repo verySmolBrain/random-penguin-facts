@@ -336,7 +336,11 @@ export default {
 };
 ```
 
-and make sure you have `"type": "module"` in your package.json file. Note you'll also have to run Jest using `node --experimental-vm-modules node_modules/jest/bin/jest.js` instead of `jest` because of the way Jest handles ES6 modules which will give you a bunch of harmless warnings that I still haven't figured out how to turn off. This should work as of now but also note that there have been lots of changes and development happening in this area so this can change pretty fast. I've read articles from 2022 that are already outdated regarding the setup for this.
+and make sure you have `"type": "module"` in your package.json file. Note you'll also have to run Jest using `node --experimental-vm-modules node_modules/jest/bin/jest.js` instead of `jest` because of the way Jest handles ES6 modules which will give you a bunch of harmless warnings that I still haven't figured out how to turn off. 
+
+There's also an issue with ts-jest where linting where it compiles and runs fine if you leave in a .ts extension or just leave our the extension completely however the linter complains it can't find the module. To fix this I converted the file to a .js file instead and used a .js extension. I suspect this is because ts-jest compiles things under the hood which means it works fine but because it's not integrated into VSCode properly, the linter doesn't actually detect this. I'm pretty sure there's a way to fix this but I haven't looked into it yet.
+
+This should work as of now but also note that there have been lots of changes and development happening in this area so this can change pretty fast. I've read articles from 2022 that are already outdated regarding the setup for this.
 
 I should also note alternatives like Vitest and Mocha + Chai that I've had pleasant experiences with as they run ES6 and TypeScript (For the most part) straight out of the box whereas Jest carries a lot of baggage and still hasn't developed well in this aspect. Though do note that Jest is by far the more popular option and has a lot more support and documentation and a proven track-record.
 
