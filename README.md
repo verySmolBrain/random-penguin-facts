@@ -9,9 +9,10 @@ Small experimental project to learn QT and WebAssembly.
 Note I've only included installation instructions for Ubuntu right now. It should be roughly the same for other OS though.
 
 1. Install Emscripten (Skip if already installed) (Instructions [here](#emscripten))
-2. Build QT for Emscripten (Skip if already installed) (Instructions [here](#qt))
-3. Install npm (Skip if already installed) (Instructions [here](#node))
-4. Update variables in `setup_env.sh` to point to your installations
+2. Install CMake (Skip if already installed) (Instructions [here](#cmake))
+3. Build QT for Emscripten (Skip if already installed) (Instructions [here](#qt))
+4. Install npm (Skip if already installed) (Instructions [here](#node))
+5. Update variables in `setup_env.sh` to point to your installations
 
 Docker WIP
 
@@ -20,7 +21,7 @@ Docker WIP
 
 ## Emscripten
 
-For instructions on how to install Emscripten you can go [here](https://emscripten.org/docs/getting_started/downloads.html). I've noted down the instructions for Ubuntu though it's very similar on other OS. Current project is using `Emscripten version 3.1.40`.
+For instructions on how to install Emscripten you can go [here](https://emscripten.org/docs/getting_started/downloads.html). I've noted down the instructions for Ubuntu though it's very similar on other OS. Current project is using `Emscripten version 3.1.40`. Personally I like to install this in /opt/.
 
 ```shell
 git clone https://github.com/emscripten-core/emsdk.git
@@ -36,11 +37,25 @@ git pull
 source ./emsdk_env.sh
 ```
 
+## CMake
+
+There are a few ways of doing this. I just used the prebuilt binaries:
+
+```shell
+sudo apt install cmake
+```
+
+Also install ninja:
+
+```shell
+sudo apt install ninja-build
+```
+
 ## QT
 
 For instructions on how to setup QT with WASM you can go [here](https://doc.qt.io/qt-6/wasm.html). The guide to [building QT from source through git](https://wiki.qt.io/Building_Qt_6_from_Git) is also going to come in handy. Note that there's an alternative and possibly easier option if you already have QT Creator already installed or if you have a QT account. Personally I just built it from git since I don't need to setup any account or download anything more than I need. I'm using `Qt version 6.7.0` along with `Emscripten version 3.1.40`.
 
-Note that since wasm-emscripten requires cross-compiling you'll need a native existing build (Correct me if I'm wrong because I couldn't find documentation for what is actually needed for the `-qt-host-path`). If you don't already have a QT version installed then just run the instructions below but without `-qt-host-path` and `-platform`. Then your `-qt-host-path` when you compile for Emscripten is the `-prefix` you used for the native build.
+Note that since wasm-emscripten requires cross-compiling you'll need a native existing build (Correct me if I'm wrong because I couldn't find documentation for what is actually needed for the `-qt-host-path`). If you don't already have a QT version installed then just run the instructions below but without `-qt-host-path` and `-platform`. Then your `-qt-host-path` when you compile for Emscripten is the `-prefix` you used for the native build. Personally I like to set the path to /opt/. Note you might need to clean up qt6-build folder if you're building multiple times.
 
 ```shell
 git clone https://code.qt.io/qt/qt5.git qt6
@@ -51,8 +66,13 @@ git switch dev
 # Depends on which modules you require
 ./init-repository -f --module-subset=qtbase,qtdeclarative,qtwebsockets
 
+cd ..
+
 mkdir qt6-build
 cd qt6-build
+
+# If you don't have an existing native build run this without -qt-host-path and -platform then repeat again with them.
+# Make sure to clean qt6-build folder if you're building multiple times.
 
 # Add -feature-thread to enable pthreads and web worker
 ../qt6/./configure -qt-host-path /path/to/existing/native/build -platform wasm-emscripten -prefix /path/to/installation
@@ -68,12 +88,12 @@ There's a few different ways of installing this. You can install directly or you
 
 ```shell
 curl https://get.volta.sh | bash
-volta install node@19.4.0
 ```
 
-Then run this in the folder:
+Open a new terminal then run this in the project root directory folder:
 
 ```shell
+volta install node@19.4.0
 npm install
 ```
 
