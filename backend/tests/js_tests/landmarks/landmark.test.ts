@@ -1,7 +1,5 @@
 import { useWASM } from '../utils/wasm.utils.js';
 
-// const WASM_instance = await useWASM();
-
 test('Checks landmark', async () => {
     const WASM_instance = await useWASM();
 
@@ -50,51 +48,62 @@ test("Check memory is garbage collected properly", async () => {
         
 
         WIP create a bigger datastructure so this is more notable
+        Log deconstructor later
     */
 })
 
+const WASM_instance = await useWASM();
 
+// @ts-ignore
+class CatHabitat extends WASM_instance.CatHabitat {
+    // Update this to use TypeScript
+    getClassName() : string {
+        return "PenguinHabitat"
+    }
+}
 
+// @ts-ignore
+class PenguinHabitat extends WASM_instance.PenguinHabitat {
+    // Update this to use TypeScript
+    getClassName() : string {
+        return "PenguinHabitat"
+    }
+}
 
-// class CatHabitat extends WASM_instance.CatHabitat {
-//     // Update this to use TypeScript
-// }
+let x = {
+    visit: function(habitat: CatHabitat | PenguinHabitat | object) {
+        // Figure out a way to not hardcode this
+        if (habitat.constructor.name === "CatHabitat") {
+            return 'CatHabitat is \$10 CatBucks';
+        } else if (habitat.constructor.name === "PenguinHabitat") {
+            return 'PenguinHabitat is \$7 PenguinBucks';
+        } 
 
-// class PenguinHabitat extends WASM_instance.PenguinHabitat {
-//     // Update this to use TypeScript
-// }
+        return "Visit function given non-habitat"
+    }
+}
 
-// var PriceVisitor = WASM_instance.Visitor.extend("Visitor", {
-//     __construct: function() {
-//         this.__parent.__construct.call(this);
-//     },
-//     __destruct: function() {
-//         this.__parent.__destruct.call(this);
-//     },
-//     visit: function(habitat: CatHabitat | PenguinHabitat) {
-//         if (habitat instanceof WASM_instance.CatHabitat) {
-//             return 'CatHabitat is \$10 CatBucks';
-//         } else if (habitat instanceof WASM_instance.PenguinHabitat) {
-//             return 'PenguinHabitat is \$7 PenguinBucks';
-//         } else {
-//             console.log("I am called")
-//         }
-//     }
-// });
-
+// let PriceVisitor = WASM_instance.Visitor.implement(x);
 
 test('Checks landmark run with Javascript Classes', async () => {
-    // const WASM_instance = await useWASM();
+    /**
+     * Visitor pattern. visitor is a class that implements the visitor interface
+     * from C++ (The visit function). It is passed into the accept function of the habitat 
+     * which is a C++ class that takes in a C++ Visitor interface.
+     * 
+     * Example of passing things between C++ and Javascript.
+     */
+    const WASM_instance = await useWASM();
 
-    // let visitor = new PriceVisitor();
-    // let catHabitat = new WASM_instance.CatHabitat();
-    // let penguinHabitat = new WASM_instance.PenguinHabitat();
+    let PriceVisitor = WASM_instance.Visitor.implement(x);
 
-    // console.log("AAA")
+    // @ts-ignore
+    let catHabitat = new WASM_instance.CatHabitat();
+    // @ts-ignore
+    let penguinHabitat = new WASM_instance.PenguinHabitat();
     
-    // catHabitat.accept(visitor);
-    // penguinHabitat.accept(visitor);
+    catHabitat.accept(PriceVisitor);
+    penguinHabitat.accept(PriceVisitor);
 });
 
-// Extend doesn't work because Visitor != Visitor?
-// Don't think it's possible for some scenarios https://github.com/emscripten-core/emscripten/issues/7200
+// Try to remove smart_ptr_constructor and see if it still works?

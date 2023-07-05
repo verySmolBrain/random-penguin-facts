@@ -59,6 +59,10 @@ public:
     void accept(Visitor* visitor) override {
         std::cout << visitor->visit(this) << std::endl;
     }
+
+    // ~CatHabitat() {
+    //     std::cout << "CatHabitat is being destroyed." << std::endl;
+    // }
 };
 
 class PenguinHabitat : public Element {
@@ -83,11 +87,11 @@ EMSCRIPTEN_BINDINGS(main_module) {
         .function("accept", &Element::accept, emscripten::allow_raw_pointers());
 
     emscripten::class_<CatHabitat, emscripten::base<Element>>("CatHabitat")
-        .constructor<>()
+        .smart_ptr_constructor("CatHabitat", &std::make_shared<CatHabitat>)
         .function("accept", &CatHabitat::accept, emscripten::allow_raw_pointers());
 
     emscripten::class_<PenguinHabitat, emscripten::base<Element>>("PenguinHabitat")
-        .constructor<>()
+        .smart_ptr_constructor("PenguinHabitat", &std::make_shared<PenguinHabitat>)
         .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
     
     // emscripten::class_<Interface>("Interface")
@@ -95,9 +99,11 @@ EMSCRIPTEN_BINDINGS(main_module) {
     //     .allow_subclass<InterfaceWrapper>("InterfaceWrapper");
 }
 
-// Fix CMake binding issue
+
 
 // Abstract Classes Implementation -> Shared Pointers
 // Extending a C++ Class in Javascript and Passing it Back Into C++
 // Object Lifetime (Check whether destructor is called) -> Look into exit
 // Containers like Vectors
+
+// Capture stdout

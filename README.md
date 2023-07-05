@@ -14,6 +14,8 @@ Note I've only included installation instructions for Ubuntu right now. It shoul
 4. Install npm (Skip if already installed) (Instructions [here](#node))
 5. Update variables in `setup_env.sh` to point to your installations
 
+To get started you can try to run `npm run test` or `npm run dev_frontend` in the project root directory. In ./frontend you can run `npm run dev` to start the frontend and `npm run build && npm run preview` to see a compiled version. In ./backend you can run `npm run build_lib` to build the library and `npm run test` to run the tests.
+
 Docker WIP
 
 
@@ -425,7 +427,30 @@ object which means you should instead just use `await MyModuleName()` instead. N
 
 A common issue you'll find documented is CORS issue with SharedArrayBuffer if you decide to use pthreads and web workers (Personally I've struggled to get web workers running with QT + Emscripten). A solution if you want to play with standard HTML files is the `qtwasmserver.py` that you can download from Python pip. Emscripten also has a built in tool for this. I've talked about how to resolve this easily in Vite + React in [Frontend](#es6--typescript--frontend-reflection) without needing to setup and certificates.
 
-This is more of a personal note but make sure you link your libraries properly if you're using Embind. I've found that the Embind doesn't actually generate if you don't do this.
+This is more of a personal note but make sure you link your libraries properly if you're using Embind. I've found that the Embind doesn't actually generate if you don't do this. This means linking your libraries as OBJECT instead of STATIC in CMake.
+
+
+I've found the best way to pass clases between JavaScript and C++ is to use `.implement()` on an abstract class. What I realised is that if you `.extend()` a JavaScript class on a C++ exported class with Embind, you can't pass this back into a C++ function that expects the base class. You'll get an error along the lines of:
+
+```
+Binding Error: Expected Visitor got Visitor
+```
+
+I think what happens is `.extend()` creates a JavaScript class that inherits from the C++ class but it's technically a JavaScript wrapper class so you can't pass it back into a C++ function. If you use `.implement()` it constructs the class as a C++ class that calls the JavaScript function so you can pass back into a C++ function. This is my understanding at least but the [official documentation](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#classes) has more information about this.
+
+Note if you do do this, you won't be able to use instanceof to compare C++ classes with Javascript classes because of Embind wrappers. There should be a way of doing this but I'll have to look into it. So far I've just been hardcoding checking the equality for the class constructor name.
+
+
+Note for Emscripten Embind it doesn't clean up automatically after you. This is documented in the [official Embind documentation](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html) where automatic deletion comes from a feature in ECMAScript 2021 and relies on the `FinalizationRegistry` API as well as requirements for a shared pointer constructor and they have noted this still does not offer a guarantee for cleanup. It is recommended to manually call `.delete()` for any C++ handlers you've created. 
+
+If you don't use a `smart_pointer_constructor` then I think what happens is Javascript creates everything on the stack so no warning is created even if you don't call `.delete`. If you do use `smart_pointer_constructor` then it creates it on the heap which results in the following message if `.delete()` is not called on the C++ handler:
+
+```md
+Embind found a leaked C++ instance PenguinHabitat <0x0080e384>.
+      We'll free it automatically in this case, but this functionality is not reliable across various environments.
+```
+
+Note this is pure speculation on my part because I haven't dug deep into this yet and I'm not familiar with the JavaScript garbage collector.
 
 # WIP
 
