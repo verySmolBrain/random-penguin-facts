@@ -4,22 +4,43 @@
 
 Small experimental project to learn QT and WebAssembly.
 
-# Quick Setup
+# Quick Setup Guide
 
-Follow this
+Note I've only included installation instructions for Ubuntu right now. It should be roughly the same for other OS though.
 
-and this
+1. Install Emscripten (Skip if already installed) (Instructions [here](#emscripten))
+2. Build QT for Emscripten (Skip if already installed) (Instructions [here](#qt))
+3. Install npm (Skip if already installed) (Instructions [here](#node))
+4. Update variables in `setup_env.sh` to point to your installations
 
-and this
+Docker WIP
 
 
 # Environment Setup
 
 ## Emscripten
 
+For instructions on how to install Emscripten you can go [here](https://emscripten.org/docs/getting_started/downloads.html). I've noted down the instructions for Ubuntu though it's very similar on other OS. Current project is using `Emscripten version 3.1.40`.
+
+```shell
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+
+git pull
+
+./emsdk install latest
+./emsdk activate latest
+
+# Activate PATH and other environment variables in the current terminal
+# Not necessary for us but it does print out all the paths you need to update `setup_env.sh` with
+source ./emsdk_env.sh
+```
+
 ## QT
 
-For instructions on how to setup QT with WASM you can go [here](https://doc.qt.io/qt-6/wasm.html). The guide to [building QT from source through git](https://wiki.qt.io/Building_Qt_6_from_Git) is also going to come in handy. Note that there's an alternative and possibly easier option if you already have QT Creator already installed or if you have a QT account. Personally I just built it from git since I don't need to setup any account or download anything more than I need. I'm using Qt version 6.7.0 along with Emscripten version 3.1.40.
+For instructions on how to setup QT with WASM you can go [here](https://doc.qt.io/qt-6/wasm.html). The guide to [building QT from source through git](https://wiki.qt.io/Building_Qt_6_from_Git) is also going to come in handy. Note that there's an alternative and possibly easier option if you already have QT Creator already installed or if you have a QT account. Personally I just built it from git since I don't need to setup any account or download anything more than I need. I'm using `Qt version 6.7.0` along with `Emscripten version 3.1.40`.
+
+Note that since wasm-emscripten requires cross-compiling you'll need a native existing build (Correct me if I'm wrong because I couldn't find documentation for what is actually needed for the `-qt-host-path`). If you don't already have a QT version installed then just run the instructions below but without `-qt-host-path` and `-platform`. Then your `-qt-host-path` when you compile for Emscripten is the `-prefix` you used for the native build.
 
 ```shell
 git clone https://code.qt.io/qt/qt5.git qt6
@@ -33,19 +54,27 @@ git switch dev
 mkdir qt6-build
 cd qt6-build
 
+# Add -feature-thread to enable pthreads and web worker
+../qt6/./configure -qt-host-path /path/to/existing/native/build -platform wasm-emscripten -prefix /path/to/installation
 
-../qt6/./configure -qt-host-path /opt/qt6 -platform wasm-emscripten -feature-thread -prefix /opt/qt6-emscripten-multithread
-
-# Edit 4 to whatever amount of threads you want to use. Or leave it out and let it figure itself out.
+# Edit 4 to whatever amount of threads you want to use. Or leave it out
 cmake --build . --parallel 4
 cmake --install .
 ```
 
 ## Node
 
-## Vite
+There's a few different ways of installing this. You can install directly or you can use a manager like nvm. Personally I use Volta so I'll have the installation instructions be based on that:
 
+```shell
+curl https://get.volta.sh | bash
+```
 
+Then run this in the folder:
+
+```shell
+npm install
+```
 
 # VSCode Setup
 
