@@ -68,6 +68,7 @@ There's a few different ways of installing this. You can install directly or you
 
 ```shell
 curl https://get.volta.sh | bash
+volta install node@19.4.0
 ```
 
 Then run this in the folder:
