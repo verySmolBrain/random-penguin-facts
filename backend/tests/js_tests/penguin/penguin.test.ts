@@ -5,4 +5,3 @@ test('Checks penguin', async () => {
 
     expect(WASM_instance.penguin()).toBe("Penguins are excellent swimmers!");
 });
-
