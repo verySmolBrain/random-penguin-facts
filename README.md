@@ -53,7 +53,9 @@ sudo apt install ninja-build
 
 ## QT
 
-For instructions on how to setup QT with WASM you can go [here](https://doc.qt.io/qt-6/wasm.html). The guide to [building QT from source through git](https://wiki.qt.io/Building_Qt_6_from_Git) is also going to come in handy. Note that there's an alternative and possibly easier option if you already have QT Creator already installed or if you have a QT account. Personally I just built it from git since I don't need to setup any account or download anything more than I need. I'm using `Qt version 6.7.0` along with `Emscripten version 3.1.40`.
+For instructions on how to setup QT with WASM you can go [here](https://doc.qt.io/qt-6/wasm.html). The guide to [building QT from source through git](https://wiki.qt.io/Building_Qt_6_from_Git) is also going to come in handy. Note that there's an alternative and possibly easier option if you already have QT Creator already installed or if you have a QT account. You can simply use the QT Online Installer by logging into your QT account and selecting the binary you want to install.
+
+Personally I just built it from git since I don't need to setup any account or download anything more than I need. I'm using `Qt version 6.7.0` along with `Emscripten version 3.1.40`.
 
 Note that since wasm-emscripten requires cross-compiling you'll need a native existing build (Correct me if I'm wrong because I couldn't find documentation for what is actually needed for the `-qt-host-path`). If you don't already have a QT version installed then just run the instructions below but without `-qt-host-path` and `-platform`. Then your `-qt-host-path` when you compile for Emscripten is the `-prefix` you used for the native build. Personally I like to set the path to /opt/. Note you might need to clean up qt6-build folder if you're building multiple times.
 
@@ -203,17 +205,27 @@ The JestRunner command is required because otherwise it won't work with ES6 modu
 You also have to set `cmake-tools-kits.json` by going to command palette `CMake: Edit User-Local CMake Kits` and appending this to the list:
 
 ```json
-{
-    "name": "random_emscripten_facts (QT Emscripten Threadless Clang)",
+  {
+    "name": "random_emscripten_facts (QT Emscripten Threadless Clang) (Outer)",
     "compilers": {
-        "C": "/usr/bin/clang",
-        "CXX": "/usr/bin/clang++"
+      "C": "/usr/bin/clang",
+      "CXX": "/usr/bin/clang++"
     },
     "environmentSetupScript": "${workspaceFolder}/setup_env.sh",
-}
+    "isTrusted": true
+  },
+  {
+    "name": "random_emscripten_facts (QT Emscripten Threadless Clang) (Inner)",
+    "compilers": {
+      "C": "/usr/bin/clang",
+      "CXX": "/usr/bin/clang++"
+    },
+    "environmentSetupScript": "${workspaceFolder}/../setup_env.sh",
+    "isTrusted": true
+  }
 ```
 
-Feel free to change the compilers to whatever you're using.
+Feel free to change the compilers to whatever you're using. The reason we have 2 is one is for opening in the root directory and the other is for opening in the backend directory. I haven't found a way to make it work with just one yet.
 
 Unfortunately you'll have to do this in the global one instead of the local .vscode version since there's an issue with CMake Tool extension's file watcher that doesn't detect `cmake-tools-kits.json` in the local .vscode folder. You can read more about the issue [here](https://github.com/microsoft/vscode-cmake-tools/issues/1416#issuecomment-733889401) but it's essentially still on the backlog to be fixed. Note this might just be unique to me based on my VSCode setup so you might have better luck with detecting the custom kit.
 
@@ -423,14 +435,7 @@ This is more of a personal note but make sure you link your libraries properly i
 - Implement TypeScript properly 
 - Remember more specific issues I ran into
 - Installation instructions for other OS
-
-Installation
-Github Workflow
-
-Improve CMake
-
-Abstract Classes
-Embind More Stuff
+- Potentially setup a github test runner (Not sure if this is worth since QT takes a loooong time to build)
 
 # Compatibility
 

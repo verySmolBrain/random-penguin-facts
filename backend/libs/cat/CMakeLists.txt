@@ -1,5 +1,5 @@
 # Static vs Dynamic vs Shared Library -> Look Into
-add_library(cat_facts STATIC
+add_library(cat_facts OBJECT
     cats.cpp
     cats.h
 )

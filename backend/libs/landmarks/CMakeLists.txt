@@ -1,5 +1,5 @@
 # Static vs Dynamic vs Shared Library -> Look Into
-add_library(visiting_landmarks STATIC
+add_library(visiting_landmarks OBJECT
     landmarks.cpp
     landmarks.h
 )

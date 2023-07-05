@@ -67,3 +67,37 @@ public:
         std::cout << visitor->visit(this) << std::endl;
     }
 };
+
+EMSCRIPTEN_BINDINGS(main_module) {
+    emscripten::class_<Visitor>("Visitor")
+        .function("visit", emscripten::select_overload<std::string(CatHabitat*)>(&Visitor::visit), emscripten::pure_virtual(), emscripten::allow_raw_pointers())
+        .function("visit", emscripten::select_overload<std::string(PenguinHabitat*)>(&Visitor::visit), emscripten::pure_virtual(), emscripten::allow_raw_pointers())
+        .allow_subclass<VisitorWrapper>("VisitorWrapper");
+
+    emscripten::class_<ConcreteVisitor, emscripten::base<Visitor>>("ConcreteVisitor")
+        .constructor<>()
+        .function("visit", emscripten::select_overload<std::string(CatHabitat*)>(&ConcreteVisitor::visit), emscripten::allow_raw_pointers())
+        .function("visit", emscripten::select_overload<std::string(PenguinHabitat*)>(&ConcreteVisitor::visit), emscripten::allow_raw_pointers());
+
+    emscripten::class_<Element>("Element")
+        .function("accept", &Element::accept, emscripten::allow_raw_pointers());
+
+    emscripten::class_<CatHabitat, emscripten::base<Element>>("CatHabitat")
+        .constructor<>()
+        .function("accept", &CatHabitat::accept, emscripten::allow_raw_pointers());
+
+    emscripten::class_<PenguinHabitat, emscripten::base<Element>>("PenguinHabitat")
+        .constructor<>()
+        .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
+    
+    // emscripten::class_<Interface>("Interface")
+    //     .function("invoke", &Interface::invoke, emscripten::pure_virtual())
+    //     .allow_subclass<InterfaceWrapper>("InterfaceWrapper");
+}
+
+// Fix CMake binding issue
+
+// Abstract Classes Implementation -> Shared Pointers
+// Extending a C++ Class in Javascript and Passing it Back Into C++
+// Object Lifetime (Check whether destructor is called) -> Look into exit
+// Containers like Vectors
