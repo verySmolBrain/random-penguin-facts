@@ -1,0 +1,45 @@
+# name: Environment Setup
+
+# on:
+#   push:
+#     branches:
+#       - main, ci/cd
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   setup:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Install Emscripten
+#         run: |
+#           uses: mymindstorm/setup-emsdk@v8
+
+#       - name: Install CMake
+#         run: sudo apt install cmake ninja-build
+
+#       - name: Install Qt for Emscripten
+#         run: |
+#           git clone https://code.qt.io/qt/qt5.git qt6
+#           cd qt6
+#           git switch dev
+#           ./init-repository -f --module-subset=qtbase,qtdeclarative,qtwebsockets
+#           cd ..
+#           mkdir qt6-build
+#           cd qt6-build
+#           ../qt6/./configure -qt-host-path /path/to/existing/native/build -platform wasm-emscripten -prefix /path/to/installation
+#           cmake --build . --parallel 4
+#           cmake --install .
+
+#       - name: Install Node.js
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: 19.4.0
+
+#       - name: Install npm dependencies
+#         run: npm install

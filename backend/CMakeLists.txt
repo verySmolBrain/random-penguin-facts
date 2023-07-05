@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Import Qt6
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-qt_standard_project_setup()
 
 # Add subdirectories
 add_subdirectory(src/app)

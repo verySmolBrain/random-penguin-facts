@@ -20,7 +20,9 @@
         "build_frontend": "", 
         "build": "", 
         
-        "preview": "npm --prefix ./frontend run preview"
+        "preview": "npm --prefix ./frontend run preview",
+
+        "postinstall": "npm --prefix ./frontend install && npm --prefix ./backend install"
     },
     "config": {
         "backend_build": "./backend/build/src/app/penguin_app.js ./backend/build/src/app/penguin_app.wasm",

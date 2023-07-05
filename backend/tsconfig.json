@@ -20,7 +20,7 @@
     },
 
     "include": [
-        "tests/**/*.ts", "tests/js_tests/utils/wasm.utils.ts",
+        "tests/**/*.ts", "tests/js_tests/utils/wasm.utils.js",
     ],
     "exclude": [
         "node_modules",

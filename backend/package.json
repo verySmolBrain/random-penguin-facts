@@ -10,16 +10,8 @@
         "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
         "build_lib": "./build.sh"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/verySmolBrain/random-penguin-facts.git"
-    },
     "author": "smol.brain",
     "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/verySmolBrain/random-penguin-facts/issues"
-    },
-    "homepage": "https://github.com/verySmolBrain/random-penguin-facts#readme",
     "devDependencies": {
         "@types/jest": "^29.5.2",
         "jest": "^29.5.0",
