@@ -17,39 +17,20 @@ test("Check memory is garbage collected properly", async () => {
     // @ts-ignore
     let visitor = new WASM_instance.ConcreteVisitor();
 
-    console.log("Initial memory usage: ", process.memoryUsage().heapUsed);
-
     for (let i = 0; i < 10000; i++) {
-    { // start new scope
+        { // start new scope
+            // @ts-ignore
+            let catHabitat = new WASM_instance.CatHabitat();
+            // @ts-ignore
+            let penguinHabitat = new WASM_instance.PenguinHabitat();
 
-        // @ts-ignore
-        let catHabitat = new WASM_instance.CatHabitat();
-        // @ts-ignore
-        let penguinHabitat = new WASM_instance.PenguinHabitat();
-
-        catHabitat.delete();
-        penguinHabitat.delete();
-    } // end scope
-
-    if (i % 1000 === 0) {
-        if (global.gc) {
-            global.gc();  // manually trigger garbage collection
-        }
-        console.log("Memory usage after", i, "iterations: ", process.memoryUsage().heapUsed);
-    }
+            // catHabitat.delete();
+            // penguinHabitat.delete();
+        } // end scope
     }
 
-    console.log("Final memory usage: ", process.memoryUsage().heapUsed);
-
-    /* 
-        This is without shared pointers. Note it varies:
-            Using delete: Final memory usage:  166048472
-            Without delete: Final memory usage:  166121840
-        
-
-        WIP create a bigger datastructure so this is more notable
-        Log deconstructor later
-    */
+    // @ts-ignore
+    let penguinHabitat = new WASM_instance.PenguinHabitat();
 })
 
 const WASM_instance = await useWASM();
@@ -87,7 +68,7 @@ let x = {
 
 test('Checks landmark run with Javascript Classes', async () => {
     /**
-     * Visitor pattern. visitor is a class that implements the visitor interface
+     * Visitor pattern. PriceVisitor implements the visitor interface
      * from C++ (The visit function). It is passed into the accept function of the habitat 
      * which is a C++ class that takes in a C++ Visitor interface.
      * 
@@ -107,3 +88,4 @@ test('Checks landmark run with Javascript Classes', async () => {
 });
 
 // Try to remove smart_ptr_constructor and see if it still works?
+// Capture stdout later instead of random printing in test

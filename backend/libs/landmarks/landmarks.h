@@ -23,19 +23,6 @@ struct VisitorWrapper : public emscripten::wrapper<Visitor> {
     }
 };
 
-// struct Interface {
-//     virtual ~Interface() {}
-
-//     virtual void invoke(const std::string& str) = 0;
-// };
-
-// struct InterfaceWrapper : public emscripten::wrapper<Interface> {
-//     EMSCRIPTEN_WRAPPER(InterfaceWrapper);
-//     void invoke(const std::string& str) {
-//         return call<void>("invoke", str);
-//     }
-// };
-
 class ConcreteVisitor : public Visitor {
 public:
     std::string visit(CatHabitat* element) override {
@@ -93,17 +80,9 @@ EMSCRIPTEN_BINDINGS(main_module) {
     emscripten::class_<PenguinHabitat, emscripten::base<Element>>("PenguinHabitat")
         .smart_ptr_constructor("PenguinHabitat", &std::make_shared<PenguinHabitat>)
         .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
-    
-    // emscripten::class_<Interface>("Interface")
-    //     .function("invoke", &Interface::invoke, emscripten::pure_virtual())
-    //     .allow_subclass<InterfaceWrapper>("InterfaceWrapper");
 }
 
 
 
-// Abstract Classes Implementation -> Shared Pointers
-// Extending a C++ Class in Javascript and Passing it Back Into C++
-// Object Lifetime (Check whether destructor is called) -> Look into exit
-// Containers like Vectors
 
-// Capture stdout
+// Containers like Vectors
