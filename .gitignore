@@ -48,3 +48,6 @@ test_webworker_not
 node_modules
 
 backend/coverage
+
+frontend/src/utils/*.js
+frontend/src/utils/*.wasm
