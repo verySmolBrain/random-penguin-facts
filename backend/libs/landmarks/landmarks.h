@@ -82,7 +82,10 @@ EMSCRIPTEN_BINDINGS(main_module) {
         .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
 }
 
-
-
+// Base Class
+// Automatic Downcasting
+// Non-Abstract Virtual Methods
+// Smart Pointers
+// External Constructor
 
 // Containers like Vectors

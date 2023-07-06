@@ -241,7 +241,7 @@ I've looked into a few alternatives. One is to just have the user export the env
 
 - If you use QT CMake tools and their macros (In particular `qt_standard_project_setup`), it requires you to use `CMake: Delete Cache and Reconfigure` from the VSCode CMake extension each time you build with the CMake extension otherwise it complains that it can't find `qt_standard_project_setup`. I'm not sure what's causing the problem but my suspicion is it has something to do with the flags that `qt_standard_project_setup` sets. I've decided to just not use their macros since I'm not comfortable with it doing so many things under the hood (And so far it runs fine but I've also not gone very indepth with QT at all). This shouldn't affect anything in the project even if you do set it up (Since we mainly use a script to build instead of the CMake extension) but it was a minor annoyance to me.
 
-- Jest test runner extension works only with a hacky workaround. This is because to get Jest working with ES6 modules, the official workaround is to call Jest with node --experimental-vm-modules. You'll get Warnings about it being an experimental feature because as of the time of writing the ES6 standard has many basic features still being experimental. It's a minor annoyance and I've talked more about this issue in [Frontend](#es6--typescript--frontend-reflection).
+- Jest test runner extension works only with a hacky workaround. This is because to get Jest working with ES6 modules, the official workaround is to call Jest with node --experimental-vm-modules. You'll get Warnings about it being an experimental feature because as of the time of writing the ES6 standard has many basic features still being experimental. It's a minor annoyance and I've talked more about this issue in [Frontend](#es6--typescript--frontend-reflection) and also using cjs vs mjs.
 
 - Typescript linter doesn't work if you try to import modules using ES6 imports like `import module from 'path'` even if it compiles fine with Jest. It also compiles and runs fine if you add `.ts` to the end of `path` but the linter doesn't like it. I've talked more about this issue in [Frontend](#es6--typescript--frontend-reflection).
 
@@ -287,14 +287,14 @@ The same issue also happens in Vite + React environment with QT CMake exporting 
 - [ ] Vite + React Development
 - [ ] Vite + React Build
 
-This works ok with Typescript Jest (Once you modify your node environment to use CommonJS) but not so well on the actual frontend. I've tried to update the .js files to .cjs files manually but I get import errors from vite when it actually tries to dynamically load it. I've seen some articles about either using Vite transform or WebPack that might make it compatible but that's WIP.
+This works ok with Typescript Jest (Once you modify your node environment to use CommonJS) but not so well on the actual frontend. I've tried to update the .js files to .cjs files manually but I still get import errors from vite when it actually tries to dynamically load it. I'm not sure why this is the case since Vite should technically work fine with importing .cjs files but this might be a compatibility issue between generated code from Emscripten and the Vite bundler. There's a potential path to look into with using `ENVIRONMENT` flag when building for Emscripten which might solve it though so far everything is working for ES6 for me so I haven't looked too deeply into this. I've seen some articles about either using Vite transform or WebPack that might make it compatible but that's WIP.
 
 ## Emscripten Flags
 
 Do note there's an issue? with QT CMake where you can pass it flags and it will do either nothing or break everything. Here's
 a rundown of issues I've gotten with flags:
 
-- QT CMake automatically injects a few flags into emcc when it compiles. ~I haven't narrowed down the exact flags but I do know it uses an optimisation flag because it spits out compiled .js files whereas if you compile with emcc it compiles readable .js files.~ (I don't know what I did but this is no longer the case. I think I removed the QT CMake macros and now it generates code slightly different to Emscripten without optimisation but still readable). This might be helpful to know since I've tracked down a few issues I had involving ES6 exports / imports by manually compiling and reading some of the comments / code. It also does something weird with web worker if you use pthreads that is incompatible with 
+- QT CMake automatically injects a few flags into emcc when it compiles. ~I haven't narrowed down the exact flags but I do know it uses an optimisation flag because it spits out compiled .js files whereas if you compile with emcc it compiles readable .js files.~ (I don't know what I did but this is no longer the case. I think I removed the QT CMake macros and now it generates code slightly different to Emscripten without optimisation and still readable with comments not removed). This might be helpful to know since I've tracked down a few issues I had involving ES6 exports / imports by manually compiling and reading some of the comments / code. It also does something weird with web worker if you use pthreads that is incompatible with 
 ES6 imports (Or at least I haven't been able to get it to work with Vite).
 
 - If you use a certain combination of flags as described [here](https://github.com/emscripten-core/emscripten/issues/18626) to export multithreaded ES6 then you have to manually add support for ES6 to the generated worker file.
@@ -333,9 +333,15 @@ QT CMake also generates extra things like .html file and a `qtloader.js` file. I
 
 # ES6 + Typescript + Frontend Reflection
 
-For the node side it's unfortunate that a lot of common features in ES6 are still not finalised (As of the time of writing) especially on the node side of things which means it can be a bit hard to setup. Though from what I've read ES6 is the path JS is going down now and most modern frontend frameworks are already using it so this might be worth it over CommonJS for a newer project.
+For the node side it's unfortunate that a lot of common features in ES6 (More aptly known as ESM) are still not finalised (As of the time of writing) especially on the node side of things which means it can be a bit hard to setup. Though from what I've read ES6 is the path JS is going down now and most modern frontend frameworks are already using it so this might be worth it over CommonJS for a newer project and for learning purposes.
 
-Jest does not work well with anything other than standard JavaScript with CommonJS requires imports. You'll need to install ts-jest or have a babel setup for Typescript support. If you want to setup Typescript + ES6 imports with ts-jest you should have a jest.config.js file that looks something like this:
+Though do note there's a looot of growing pains associated with the transition from CommonJS to ESM due to the JavaScript ecosystem wanting as much backwards compatibility as possible. This means the community is fragmented with many libraries not working with ESM and also many libraries trying to lead the way forward by allowing only ESM. This means by using ESM you'll end up losing a large portion of the JavaScript ecosystem which still relies pretty heavily on CommonJS. This situation can be compared with the transition from Python2 to Python3 and to achieve feature parity and an ecosystem as developed as CommonJS will still require a few years more of transitioning.
+
+There are a few alternatives. First is that both CommonJS and ESM support either the .cjs (CommonJS) or .mjs (ES Module) extensions which means it will import the file accordingly. For drawbacks regarding using CommonJS with .mjs extensions you can read [this](https://github.com/aws/aws-cdk/issues/13274) issue. Using ESM with .cjs is a bit more flexible since ESM is built after the inception of CommonJS and is designed to be backwards compatible. Another option is to use TypeScript to compile your code. TypeScript supports ESM imports straight out of the box and transpiles your code to a target you want such as CommonJS or ESM.
+
+Personally I use both ESM + TypeScript because this is an experimental project and trying to set it up to support this combination was a good learning experience. I've also noted that having TypeScript compile to ESM with module set makes it very easy to port things over to Vite which is the frontend bundler I'm using.
+
+For testing, Jest does not work well with anything other than standard JavaScript with CommonJS requires imports. You'll need to install ts-jest or have a Babel setup for Typescript support. If you want to setup Typescript + ESM imports with ts-jest you should have a jest.config.js file that looks something like this:
 
 ```js
 /** @type {import('ts-jest').JestConfigWithTsJest} */
@@ -356,7 +362,7 @@ export default {
 
 and make sure you have `"type": "module"` in your package.json file. Note you'll also have to run Jest using `node --experimental-vm-modules node_modules/jest/bin/jest.js` instead of `jest` because of the way Jest handles ES6 modules which will give you a bunch of harmless warnings that I still haven't figured out how to turn off. 
 
-There's also an issue with ts-jest where linting where it compiles and runs fine if you leave in a .ts extension or just leave our the extension completely however the linter complains it can't find the module. To fix this I converted the file to a .js file instead and used a .js extension. I suspect this is because ts-jest compiles things under the hood which means it works fine but because it's not integrated into VSCode properly, the linter doesn't actually detect this. I'm pretty sure there's a way to fix this but I haven't looked into it yet.
+There's also an issue with ts-jest with linting where it compiles and runs fine if you leave in a .ts extension or just leave our the extension completely however the linter complains it can't find the module. To fix this I converted the file to a .js file instead and used a .js extension. I suspect this is because ts-jest compiles things under the hood which means it works fine but because it's not integrated into VSCode properly, the linter doesn't actually detect this. I'm pretty sure there's a way to fix this but I haven't looked into it yet. Either that or I just setup things wrong so if anyone has a fix it would be nice.
 
 This should work as of now but also note that there have been lots of changes and development happening in this area so this can change pretty fast. I've read articles from 2022 that are already outdated regarding the setup for this.
 
@@ -413,7 +419,7 @@ server: {
 to `defineConfig()` in vite.config.ts.
 
 
-Note that from my experience with it so far, Vite reacts poorly to CommonJS files. I haven't been able to figure a way to export Emscripten as CommonJS and be able to import it into a component because it complains without just changing it to an ES6 import. Especially true if pthreads is enabled and it generates a web worker.js file. An alternative is to try out WebPack or another bundler but from what I've read and tried, Vite has the best developer experience so far.
+Note that from my experience with it so far, Vite reacts poorly to Emscripten generated CommonJS files. I haven't been able to figure a way to export Emscripten as CommonJS and be able to import it into a component because it complains and I end up having to just change it to an ES6 import. Especially true if pthreads is enabled and it generates a web worker.js file. An alternative is to try out WebPack or another bundler but from what I've read and tried, Vite has the best developer experience so far.
 
 I've also setup a few scripts in `package.json` that essentially call nested npm scripts in ./backend and ./frontend that can build + test an environment. What I've learnt is to separate the commands as much as possible since .json doesn't let you do new lines and use `prefix-path` instead of cd since it's a lot cleaner.
 
@@ -421,7 +427,7 @@ I've also setup a few scripts in `package.json` that essentially call nested npm
 
 Emscripten by itself works pretty nicely (Most of the time). 
 
-Here's an explanation for the flags I use. I've added `--no-entry` so main isn't called automatically since I'm mainly playing around with libraries right now instead of generating an actual executable that needs to be run each time. This means main isn't called. I also use `-s EXPORT_ES6=1` which requires `-s MODULARIZE=1` because I mainly work with ES6. Explanation for `-s EXIT_RUNTIME=1` should be right above this part.
+Here's an explanation for the flags I use. I've added `--no-entry` so main isn't called automatically since I'm mainly playing around with libraries right now instead of generating an actual executable that needs to be run each time. This means main isn't called. I also use `-s EXPORT_ES6=1` which requires `-s MODULARIZE=1` because I mainly work with ES6. Explanation for `-s EXIT_RUNTIME=1` should be [here](#emcc--multithreaded--esm).
 
 The main issues I ran into were from weird ES6 vs CommonJS compatibility. I've mentioned most of them in [Emscripten Build Flags](#emscripten-flags).
 So far with Emscripten, porting it over to ES6 seems like the only way to get it working with a modern build tool like Vite which all seem to expect ES6 modules instead of CommonJS. I've talked more about this in [Frontend](#es6--typescript--frontend-reflection) but essentially if you want to use CommonJS you either stick it straight into a .html file, you try to use some weird .vite settings to configure CommonJS imports or you try another bundler like WebPack. 
@@ -434,14 +440,13 @@ A common issue you'll find documented is CORS issue with SharedArrayBuffer if yo
 
 This is more of a personal note but make sure you link your libraries properly if you're using Embind. I've found that the Embind doesn't actually generate if you don't do this. This means linking your libraries as OBJECT instead of STATIC in CMake.
 
-
-I've found the best way to pass clases between JavaScript and C++ is to use `.implement()` on an abstract class. What I realised is that if you `.extend()` a JavaScript class on a C++ exported class with Embind, you can't pass this back into a C++ function that expects the base class. You'll get an error along the lines of:
+For abstract classes, you can use either `.extend()` or `.implement()` to create a JavaScript class that inherits from the C++ class. Either way works but they're suited for different things. You can read more about this at the [official documentation for Embind](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#classes). Note I ran into an issue early on where I used the wrong Embind macro as my class function wasn't a pure virtual and received this error:
 
 ```
 Binding Error: Expected Visitor got Visitor
 ```
 
-I think what happens is `.extend()` creates a JavaScript class that inherits from the C++ class but it's technically a JavaScript wrapper class so you can't pass it back into a C++ function. If you use `.implement()` it constructs the class as a C++ class that calls the JavaScript function so you can pass back into a C++ function. This is my understanding at least but the [official documentation](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#classes) has more information about this.
+which was rather confusing. I thought it had to do with me using `.implement()` over `.extend()` but it turns out I just exported it through Embind wrong. There's a different binding you'll have to use if you want to have an optional override instead of pure virtual. Note that you should use the pure virtual flag when you export a pure virtual class in C++ so you get actual errors that tell you you haven't implemented the abstract class yet. I didn't do this the first time and was wondering whether Emscripten was broken. The official documentation is quite helpful in this regard so make sure to read it fully instead of skimming it like I did. 
 
 Note if you do do this, you won't be able to use instanceof to compare C++ classes with Javascript classes because of Embind wrappers. There should be a way of doing this but I'll have to look into it. So far I've just been hardcoding checking the equality for the class constructor name. An alternative I've tried to look into is creating a Factory Class that generates C++ classes which I haven't gotten to work yet but seems like something worth exporing for cases where you need that connectivity.
 
@@ -471,6 +476,3 @@ Note this is pure speculation on my part because I haven't dug deep into this ye
 # Compatibility
 
 Tested on Ubuntu 22.04
-
-
-

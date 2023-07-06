@@ -51,22 +51,7 @@ class PenguinHabitat extends WASM_instance.PenguinHabitat {
     }
 }
 
-let x = {
-    visit: function(habitat: CatHabitat | PenguinHabitat | object) {
-        // Figure out a way to not hardcode this
-        if (habitat.constructor.name === "CatHabitat") {
-            return 'CatHabitat is \$10 CatBucks';
-        } else if (habitat.constructor.name === "PenguinHabitat") {
-            return 'PenguinHabitat is \$7 PenguinBucks';
-        } 
-
-        return "Visit function given non-habitat"
-    }
-}
-
-// let PriceVisitor = WASM_instance.Visitor.implement(x);
-
-test('Checks landmark run with Javascript Classes', async () => {
+test('Checks landmark run with Javascript Classes using implement', async () => {
     /**
      * Visitor pattern. PriceVisitor implements the visitor interface
      * from C++ (The visit function). It is passed into the accept function of the habitat 
@@ -75,6 +60,19 @@ test('Checks landmark run with Javascript Classes', async () => {
      * Example of passing things between C++ and Javascript.
      */
     const WASM_instance = await useWASM();
+
+    let x = {
+        visit: function(habitat: CatHabitat | PenguinHabitat | object) {
+            // Figure out a way to not hardcode this
+            if (habitat.constructor.name === "CatHabitat") {
+                return 'CatHabitat is \$10 CatBucks';
+            } else if (habitat.constructor.name === "PenguinHabitat") {
+                return 'PenguinHabitat is \$7 PenguinBucks';
+            } 
+    
+            return "Visit function given non-habitat"
+        }
+    }
 
     let PriceVisitor = WASM_instance.Visitor.implement(x);
 
@@ -89,3 +87,37 @@ test('Checks landmark run with Javascript Classes', async () => {
 
 // Try to remove smart_ptr_constructor and see if it still works?
 // Capture stdout later instead of random printing in test
+
+test('Checks landmark run with Javascript Classes using extend', async () => {
+    /**
+     * Visitor pattern. PriceVisitor implements the visitor interface
+     * from C++ (The visit function). It is passed into the accept function of the habitat 
+     * which is a C++ class that takes in a C++ Visitor interface.
+     * 
+     * Example of passing things between C++ and Javascript.
+     */
+    const WASM_instance = await useWASM();
+
+    let RatingVisitorClass = WASM_instance.Visitor.extend("Visitor", {
+        visit: function(habitat: CatHabitat | PenguinHabitat | object) {
+            // Figure out a way to not hardcode this
+            if (habitat.constructor.name === "CatHabitat") {
+                return 'CatHabitat is 5 CatStars';
+            } else if (habitat.constructor.name === "PenguinHabitat") {
+                return 'PenguinHabitat is 5 PenguinStars';
+            } 
+    
+            return "Visit function given non-habitat"
+        }
+    });
+
+    let RatingVisitor = new RatingVisitorClass();
+
+    // @ts-ignore
+    let catHabitat = new WASM_instance.CatHabitat();
+    // @ts-ignore
+    let penguinHabitat = new WASM_instance.PenguinHabitat();
+    
+    catHabitat.accept(RatingVisitor);
+    penguinHabitat.accept(RatingVisitor);
+});
