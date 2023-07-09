@@ -4,6 +4,7 @@
 #include <penguins.h>
 #include <cats.h>
 #include <landmarks.h>
+#include <datastructures.h>
 
 #include <emscripten/bind.h>
 

@@ -41,11 +41,22 @@ public:
     virtual void accept(Visitor* visitor) = 0;
 };
 
+struct ElementWrapper : public emscripten::wrapper<Element> {
+    EMSCRIPTEN_WRAPPER(ElementWrapper);
+    void accept(Visitor* visitor) {
+        call<void>("accept", visitor);
+    }
+};
+
 class CatHabitat : public Element {
 public:
     void accept(Visitor* visitor) override {
         std::cout << visitor->visit(this) << std::endl;
     }
+
+    // bool operator==(const CatHabitat& other) const {
+    //     return true;
+    // }
 
     // ~CatHabitat() {
     //     std::cout << "CatHabitat is being destroyed." << std::endl;
@@ -66,12 +77,13 @@ EMSCRIPTEN_BINDINGS(main_module) {
         .allow_subclass<VisitorWrapper>("VisitorWrapper");
 
     emscripten::class_<ConcreteVisitor, emscripten::base<Visitor>>("ConcreteVisitor")
-        .constructor<>()
+        .smart_ptr_constructor("ConcreteVisitor", &std::make_shared<ConcreteVisitor>)
         .function("visit", emscripten::select_overload<std::string(CatHabitat*)>(&ConcreteVisitor::visit), emscripten::allow_raw_pointers())
         .function("visit", emscripten::select_overload<std::string(PenguinHabitat*)>(&ConcreteVisitor::visit), emscripten::allow_raw_pointers());
 
     emscripten::class_<Element>("Element")
-        .function("accept", &Element::accept, emscripten::allow_raw_pointers());
+        .function("accept", &Element::accept, emscripten::allow_raw_pointers())
+        .allow_subclass<ElementWrapper>("ElementWrapper");
 
     emscripten::class_<CatHabitat, emscripten::base<Element>>("CatHabitat")
         .smart_ptr_constructor("CatHabitat", &std::make_shared<CatHabitat>)
@@ -81,11 +93,3 @@ EMSCRIPTEN_BINDINGS(main_module) {
         .smart_ptr_constructor("PenguinHabitat", &std::make_shared<PenguinHabitat>)
         .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
 }
-
-// Base Class
-// Automatic Downcasting
-// Non-Abstract Virtual Methods
-// Smart Pointers
-// External Constructor
-
-// Containers like Vectors

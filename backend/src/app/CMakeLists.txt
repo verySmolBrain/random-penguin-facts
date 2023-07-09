@@ -9,6 +9,7 @@ target_link_libraries(penguin_app PRIVATE
     cat_facts
     penguin_facts
     visiting_landmarks
+    why
     Qt6::Widgets
 )
 
