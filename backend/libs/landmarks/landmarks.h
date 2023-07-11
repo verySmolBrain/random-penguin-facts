@@ -72,6 +72,7 @@ public:
 
 EMSCRIPTEN_BINDINGS(main_module) {
     emscripten::class_<Visitor>("Visitor")
+        .smart_ptr<std::shared_ptr<Visitor>>("shared_ptr<Visitor>")
         .function("visit", emscripten::select_overload<std::string(CatHabitat*)>(&Visitor::visit), emscripten::pure_virtual(), emscripten::allow_raw_pointers())
         .function("visit", emscripten::select_overload<std::string(PenguinHabitat*)>(&Visitor::visit), emscripten::pure_virtual(), emscripten::allow_raw_pointers())
         .allow_subclass<VisitorWrapper>("VisitorWrapper");
@@ -82,6 +83,7 @@ EMSCRIPTEN_BINDINGS(main_module) {
         .function("visit", emscripten::select_overload<std::string(PenguinHabitat*)>(&ConcreteVisitor::visit), emscripten::allow_raw_pointers());
 
     emscripten::class_<Element>("Element")
+        .smart_ptr<std::shared_ptr<Element>>("shared_ptr<Element>")
         .function("accept", &Element::accept, emscripten::allow_raw_pointers())
         .allow_subclass<ElementWrapper>("ElementWrapper");
 
@@ -92,4 +94,7 @@ EMSCRIPTEN_BINDINGS(main_module) {
     emscripten::class_<PenguinHabitat, emscripten::base<Element>>("PenguinHabitat")
         .smart_ptr_constructor("PenguinHabitat", &std::make_shared<PenguinHabitat>)
         .function("accept", &PenguinHabitat::accept, emscripten::allow_raw_pointers());
+
+
+    emscripten::register_vector<std::shared_ptr<Element>>("VectorHabitat");
 }

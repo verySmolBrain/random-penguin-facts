@@ -1,5 +1,22 @@
 import { useWASM } from '../utils/wasm.utils.js';
 
+// @ts-ignore
+let consoleOutput = [];
+// @ts-ignore
+let originalLog;
+
+// beforeEach(() => {
+//     originalLog = console.log;
+//     console.log = (output) => consoleOutput.push(output);
+// });
+  
+// afterEach(() => {
+//     expect(consoleOutput).toMatchSnapshot();
+
+//     consoleOutput = [];
+//     console.log = originalLog;
+// });
+
 test('Checks landmark', async () => {
     const wasmInstance = await useWASM();
 
@@ -171,6 +188,46 @@ test('Checks can also extend habitat', async () => {
     dogHabitat.accept(ratingVisitor);
 });
 
+test('Vector of penguin habitats', async () => {
+    const wasmInstance = await useWASM();
+
+    // @ts-ignore
+    let DogHabitat = wasmInstance.Element.extend("DogHabitat", {
+        accept: function(visitor: object) {
+            // @ts-ignore
+            if (visitor?.visit) {
+                // @ts-ignore
+                console.log(visitor.visit(this));
+            } else {
+                console.log("Visitor does not have visit function")
+            }
+        }
+    });
+
+    let habitatVector = new wasmInstance.VectorHabitat();
+    for (let i = 0; i < 1; i++) {
+        let penguinHabitat = new wasmInstance.PenguinHabitat();
+        habitatVector.push_back(penguinHabitat);
+        penguinHabitat.delete();
+        // habitatVector.push_back(new DogHabitat()); -> Passing raw pointer to smart pointer is illegal
+    }
+
+    let visitor = new wasmInstance.ConcreteVisitor();
+    for (let i = 0; i < habitatVector.size(); i++) {
+        let penguinHabitat = habitatVector.get(i);
+        penguinHabitat.accept(visitor);
+        penguinHabitat.delete();
+    }
+
+    for (let i = 0; i < habitatVector.size(); i++) {
+        habitatVector.get(i).delete();
+    }
+
+    habitatVector.delete();
+    visitor.delete();
+});
+
+
 
 // test('Check equality', async () => {
 //         /**
@@ -217,14 +274,26 @@ test('Checks can also extend habitat', async () => {
 //     catHabitat2.delete();
 // });
 
-// Check constructor name using constructor.name
-// Check using non-static overloaded equals operator
-// Check using static overloaded equals operator (Not true equals but works for a static function)
-// Non-static friend operator for equals
-// emscripten::val::global to check for constructor -> requires hardcoding JavaScript
-// static function overloads
-// look into wrapper classes
-
-// + optional chaining
 
 
+
+
+// Make a Vector of CatHabitats and have a visitor visit all of them
+// Make a more complex class that stores data and try using equality
+// Play around with static functions and see what that offers
+// Play around with overloaded functions and see what that offers
+// Play around with friend functions and see what that offers
+// Play around with emscripten::val and see what that offers
+
+
+
+// shared_pointer means you have to delete when you get otherwise it's not actually deleted
+// for (let i = 0; i < habitatVector.size(); i++) {
+//     let penguinHabitat = habitatVector.get(i);
+//     penguinHabitat.accept(visitor);
+//     penguinHabitat.delete();
+// }
+
+// Passing raw pointer to smart pointer is illegal
+// You have to use a pointer for each habitat if you want dynamic polymorphism
+// vite revert version nested worker

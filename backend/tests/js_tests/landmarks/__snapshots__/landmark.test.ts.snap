@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Check memory is garbage collected properly 1`] = `[]`;
+
+exports[`Checks can also extend habitat 1`] = `
+[
+  "DogHabitat is 5 DogStars",
+]
+`;
+
+exports[`Checks landmark 1`] = `
+[
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting PenguinHabitat.",
+]
+`;
+
+exports[`Checks landmark run with Javascript Classes using extend 1`] = `
+[
+  "CatHabitat is 5 CatStars",
+  "PenguinHabitat is 5 PenguinStars",
+  "Visit function given non-habitat",
+]
+`;
+
+exports[`Checks landmark run with Javascript Classes using implement 1`] = `
+[
+  "CatHabitat is $10 CatBucks",
+  "PenguinHabitat is $7 PenguinBucks",
+]
+`;
+
+exports[`Vector of penguin habitats 1`] = `
+[
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+]
+`;
+
+exports[`Vector of penguin habitats 2`] = `
+[
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting PenguinHabitat.",
+  "Visitor is visiting CatHabitat.",
+  "Visitor is visiting CatHabitat.",
+]
+`;

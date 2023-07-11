@@ -6,6 +6,9 @@ export default defineConfig({
     plugins: [
         react(),
     ],
+    optimizeDeps: {
+        include: ['src/utils/penguin_app.js']
+    },
     server: {
         headers: {
           'Cross-Origin-Embedder-Policy': 'require-corp',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useWasm from "../utils/useWasm.js";
-import Module from "../utils/penguin_app.js";
+import Module from "../utils/penguin_app.js"
 
 interface YourOutputMethods {
     penguin: () => string;
