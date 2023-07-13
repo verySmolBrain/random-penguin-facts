@@ -11,5 +11,6 @@ export QT_LIB="/opt/qt6-emscripten-threadless"
 #export QT_LIB="/opt/qt6-emscripten-multithread"
 
 # Modify this to adjust Emscripten flags
-export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry -s EXIT_RUNTIME=1"
+# export EMCC_DEBUG=1 # Debug change this to be option later
+export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -lembind -s MODULARIZE=1 -s EXPORT_ES6=1 --no-entry -s EXIT_RUNTIME=1 -g"
 export CMAKE_TOOLCHAIN_FILE="${QT_LIB}/lib/cmake/Qt6/qt.toolchain.cmake"

@@ -5,6 +5,7 @@
 #include <cats.h>
 #include <landmarks.h>
 #include <datastructures.h>
+#include <animals.h>
 
 #include <emscripten/bind.h>
 

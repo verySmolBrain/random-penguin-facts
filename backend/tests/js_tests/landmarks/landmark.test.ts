@@ -209,81 +209,52 @@ test('Vector of penguin habitats', async () => {
         let penguinHabitat = new wasmInstance.PenguinHabitat();
         habitatVector.push_back(penguinHabitat);
         penguinHabitat.delete();
-        // habitatVector.push_back(new DogHabitat()); -> Passing raw pointer to smart pointer is illegal
     }
 
-    let visitor = new wasmInstance.ConcreteVisitor();
+    // -> Passing raw pointer to smart pointer is illegal
+    habitatVector.push_back(new DogHabitat());
+
+    let visitor = new wasmInstance.FlexibleVisitor();
+    let dogHabitat = new DogHabitat();
+    visitor.register_habitat(dogHabitat, function() : string {
+        return "DogHabitat is 5 DogStars";
+    })
+
     for (let i = 0; i < habitatVector.size(); i++) {
-        let penguinHabitat = habitatVector.get(i);
-        penguinHabitat.accept(visitor);
-        penguinHabitat.delete();
+        let habitat = habitatVector.get(i);
+        habitat.accept(visitor);
+        habitat.delete();
     }
 
     for (let i = 0; i < habitatVector.size(); i++) {
         habitatVector.get(i).delete();
     }
 
-    habitatVector.delete();
-    visitor.delete();
+    // habitatVector.delete();
+    // visitor.delete();
+});
+
+test('Check equality', async () => {
+    const wasmInstance = await useWASM();
+
+    let cat = new wasmInstance.Cat("Puss in Boots");
+    let cat2 = new wasmInstance.Cat("Tom")
+    let penguin = new wasmInstance.Penguin("Alfred");
+
+    let object = {}
+
+    console.log(cat.equals(cat))
+    console.log(cat.equals(cat2))
+    console.log(penguin.equals(penguin))
+
+    console.log(cat.equals(object))
+
+    // cat.delete()
+    // cat2.delete()
+    // penguin.delete()
 });
 
 
-
-// test('Check equality', async () => {
-//         /**
-//      * Visitor pattern. PriceVisitor implements the visitor interface
-//      * from C++ (The visit function). It is passed into the accept function of the habitat 
-//      * which is a C++ class that takes in a C++ Visitor interface.
-//      * 
-//      * Example of passing things between C++ and Javascript.
-//      */
-//     const wasmInstance = await useWASM();
-
-//     let RatingVisitorClass = wasmInstance.Visitor.extend("Visitor", {
-//         visit: function(habitat: CatHabitat | PenguinHabitat | object) {
-//             // Figure out a way to not hardcode this
-//             // Check if it has .equals
-
-//             if (habitat.constructor.name === "CatHabitat") {
-//                 return 'CatHabitat is 5 CatStars';
-//             } else if (habitat.constructor.name === "PenguinHabitat") {
-//                 return 'PenguinHabitat is 5 PenguinStars';
-//             } 
-    
-//             return "Visit function given non-habitat"
-//         }
-//     });
-
-//     let RatingVisitor = new RatingVisitorClass();
-
-//     // @ts-ignore
-//     let catHabitat = new wasmInstance.CatHabitat();
-//     // @ts-ignore
-//     let penguinHabitat = new wasmInstance.PenguinHabitat();
-    
-//     catHabitat.accept(RatingVisitor);
-//     penguinHabitat.accept(RatingVisitor);
-
-//     let catHabitat2 = new wasmInstance.CatHabitat();
-
-//     console.log(catHabitat.equals(catHabitat2));
-//     console.log(catHabitat.equals(penguinHabitat));
-
-//     catHabitat.delete();
-//     penguinHabitat.delete();
-//     catHabitat2.delete();
-// });
-
-
-
-
-
-// Make a Vector of CatHabitats and have a visitor visit all of them
-// Make a more complex class that stores data and try using equality
-// Play around with static functions and see what that offers
-// Play around with overloaded functions and see what that offers
-// Play around with friend functions and see what that offers
-// Play around with emscripten::val and see what that offers
 
 
 
@@ -293,7 +264,23 @@ test('Vector of penguin habitats', async () => {
 //     penguinHabitat.accept(visitor);
 //     penguinHabitat.delete();
 // }
+// weak pointer but that doesn't exactly manage memory?
+// export a weak pointer and assign it?
+// BindingError: Expected null or instance of PenguinHabitat, got an instance of Element
+// It works if you don't use a shared pointer but instead a normal pointer
+// There's a fix if you do wrapperptr instead
 
-// Passing raw pointer to smart pointer is illegal
+// Note DogHabitat returns a raw pointer instead of a shared pointer for construction
+// ConcreteVisitor takes in Element but because there's no upcasting it doesn't work and
+// you get error. What if instead of overloads I just use Element + Dynamic Cast + callback function?
+
+// So make a class that stores a hashmap of habitats -> callback function and it does stuff
+
+// FlexibleVisitor -> Inherited overload
+// Overloading equality js vs c++ other options
+// Shared pointer issue + C++17 deprecation of std::auto_ptr
+// Passing raw pointer to smart pointer is illegal so do abstract class wrapper so extend returns smart pointer
 // You have to use a pointer for each habitat if you want dynamic polymorphism
+// jest snapshot test
+// doghabitat and pricevisitor
 // vite revert version nested worker
